@@ -1,4 +1,20 @@
 <!--The content below is only a placeholder and can be replaced.-->
+
+<mat-toolbar color="accent">
+  <mat-toolbar-row>
+    <span>Daily Tasks</span>
+    <span class="example-fill-remaining-space"></span>
+  
+  <button *ngIf="!isLoggedIn" type="button" mat-raised-button color="accent"  (click)="login()">
+    Signin With Google
+ </button>
+ <button *ngIf="isLoggedIn" type="button" 
+ mat-raised-button color="accent"  (click)="logout()">
+  Signout
+</button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
 <div style="text-align:center">
   <h1>
     Welcome to {{ title }}!
