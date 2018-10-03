@@ -55,11 +55,23 @@ monDb.once('open', function callback() {
   console.info('Connected to MongoDB:', config.MONGO_URI);
 });
 
+var taskSchema = new mongoose.Schema({
+   //_id: String,
+  userid: String,
+  text: String,
+  startDate: Date,
+  endDate:Date,
+  person_responsible: String,
+  mailid: String
+  });
+
+  var task = mongoose.model('Task', taskSchema);
 
 app.get('/api/tasks', (req, res) => {
+    let userid = req.query.userid;
     //connection((db) => {
         monDb.collection('tasksCollection')
-            .find()
+            .find({'userid':userid})
             .toArray()
             .then((tasks) => {
                 response.data = tasks;
@@ -70,6 +82,65 @@ app.get('/api/tasks', (req, res) => {
             });
     //})
 });
+
+app.post('/api/tasks', (req, res) => {
+     var newTask = new task(req.body);
+    //console.log(newTask);
+    // newTask.save(function(err){
+    //if (err) throw err;
+    // });
+    monDb.collection("tasksCollection")
+    .insertOne(newTask, function(error, response) {
+    if (error) 
+    {
+        console.log(error);
+        sendError(error,"");
+    }
+    if(res)
+     {
+        console.log(response);
+        res.json("Task added successfully");
+     }   
+    });
+});
+
+app.get('/api/tasks/:id', (req, res) => {
+    const id = req.params.id;
+    const details = { '_id': new mongoose.Types.ObjectId(id) };
+    monDb.collection('tasksCollection').findOne(details, (err, item) => {
+      if (err) {
+        res.send({'error':'An error has occurred'});
+      } else {
+        res.send(item);
+      } 
+    });
+  });
+
+app.put('/api/tasks/:id', (req, res) => {
+    var updatedTask = new task(req.body);
+    const objId = { '_id': new mongoose.Types.ObjectId(req.params.id) };
+    monDb.collection('tasksCollection').updateOne(objId, updatedTask, (err, result) => {
+        if (err) {
+            res.send({'error':'An error has occurred'});
+        } else {
+            //res.send(updatedTask);
+            res.json("Task updated successfully");
+        } 
+      });
+});
+
+app.delete('/api/tasks/:id', (req, res) => {
+    const objId = { '_id': new mongoose.Types.ObjectId(req.params.id) };
+    monDb.collection('tasksCollection').deleteOne(objId, (err, result) => {
+        if (err) {
+            res.send({'error':'An error has occurred'});
+        } else {
+            //res.send(updatedTask);
+            res.json("Task deleted successfully");
+        } 
+      });
+});
+
 // Error handling
 const sendError = (err, res) => {
     response.status = 501;
