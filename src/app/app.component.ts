@@ -2,8 +2,8 @@ import { Component} from '@angular/core';
 import {  MatButtonModule,MatToolbarModule} from '@angular/material';
 import { AuthService, GoogleLoginProvider, SocialUser } from "angular5-social-login";
 import { HttpClient } from '@angular/common/http';
-import { DataService, task} from './data.service';
-import { DxSchedulerModule, DxTemplateModule } from 'devextreme-angular';
+import { DataService, task, groupmember} from './data.service';
+import { DxSchedulerModule, DxTemplateModule,DxTagBoxModule } from 'devextreme-angular';
 import Query from 'devextreme/data/query';
 
 @Component({
@@ -12,13 +12,14 @@ import Query from 'devextreme/data/query';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent 
+{
   title = 'task-app';
   isLoggedIn = false;
   loginToken:SocialUser;
   currentDate: Date = new Date();
   public dailytasks: task[];
-  loggedInToken:SocialUser;
+  public groupmembers:groupmember[];
 
   constructor(private socialAuthService: AuthService, 
     private http:HttpClient, private dataService:DataService ) {
@@ -32,8 +33,11 @@ export class AppComponent {
       {
         this.isLoggedIn= true;
         this.getTasks();
+        this.getMembers();
       }
-    }
+  }
+
+
   login()
   {
     let socialPlatformProvider = GoogleLoginProvider.PROVIDER_ID;
@@ -43,7 +47,7 @@ export class AppComponent {
         this.dataService.setSession(userData);
         this.isLoggedIn= true;
         this.loginToken = userData;
-        
+        this.getMembers();
         this.getTasks();
       }
     );
@@ -53,23 +57,41 @@ export class AppComponent {
   {
     this.socialAuthService.signOut().then(
       (userData) => { //on success
+        this.dailytasks = null;
         this.isLoggedIn= false;
         this.dataService.clearSession();
       }
     );
   }
 
+  getMembers()
+  {
+    this.dataService.getMembers('http://localhost:8083/api/members/?userid='+this.loginToken.id)
+    .subscribe(resp=>{  
+      this.groupmembers = resp;
+      this.groupmembers.push({'member':this.loginToken.email});
+    },err=>{
+      console.log(err.message);
+      this.groupmembers=[];
+      this.groupmembers.push({'member':this.loginToken.email});
+    });
+  }
+
   getTasks() 
   {
-    this.dataService.getTasks('http://localhost:8083/api/tasks/?userid='+this.loginToken.id)
+    this.dataService.getTasks('http://localhost:8083/api/tasks/?userid='+this.loginToken.id+'&email='+this.loginToken.email)
     .subscribe(resp=>{  
-      this.dailytasks = resp.data;
+      //console.log(resp);
+      this.dailytasks = resp;
     
       for(let i=0;i<this.dailytasks.length;i++)
         {
           this.dailytasks[i].startDate = new Date(this.dailytasks[i].startDate);
           this.dailytasks[i].endDate = new Date(this.dailytasks[i].endDate); 
         }
+    },err=>{
+      console.log(err.message);
+      this.dailytasks = [];
     });
   }
 
@@ -78,73 +100,96 @@ export class AppComponent {
     return Query(this.dailytasks).filter(["_id", "=", id]).toArray()[0];
   }
 
-  onAppointmentFormCreated(data) {
+  onAppointmentFormCreated(data) 
+  {
     var that = this,
-        form = data.form,
-        taskInfo = that.getTaskById(data.appointmentData._id) || {},
-        startDate = data.appointmentData.startDate;
-
+    startDate = data.appointmentData.startDate,
+    form = data.form;
+    //taskInfo = that.getTaskById(data.appointmentData._id) || {};
+    //form.itemOption("text","isRequired",true);
+    //form.itemOption("ownerId","isRequired",true); 
+    data.form.option('labelLocation', 'top');
+    data.form.option('showColonAfterLabel', true);
+    data.form.option('colCount', 2);
+    data.form.option('showValidationSummary', false);
+    
     form.option("items", [
-        {
-          label: {
-              text: "Subject"
-          },
-          editorType: "dxTextBox",
-          dataField: "text"
-        }, 
-        {
-          label: {
-              text: "Responsible"
-          },
-          name: "person_responsible",
-          editorType: "dxTextBox",
-          dataField: "person_responsible",
-          editorOptions: {
-            value: taskInfo.person_responsible
-         }
-        }, 
-        {
-          dataField: "startDate",
-          editorType: "dxDateBox",
-          editorOptions: {
-              width: "100%",
-              type: "datetime",
-              onValueChanged: function(args) {
-                  startDate = args.value;
-                  form.getEditor("endDate")
-                      .option("value", new Date (startDate.getTime() + 30));
-              }
-            }   
-         }, 
-         {
-            name: "endDate",
-            dataField: "endDate",
-            editorType: "dxDateBox",
-            editorOptions: {
-                width: "100%",
-                type: "datetime"
+      {
+        label: {text: "Subject"},
+        editorType: "dxTextBox",
+        dataField: "text",
+        // editorOptions: {width: "50%"},
+        validationRules:[{type:"required"}]
+      }, 
+      {
+        label: {text: "Responsible Person"},
+        name: "person_responsible",
+        editorType: "dxSelectBox",
+        dataField: "person_responsible",
+        editorOptions: {
+          items: that.groupmembers,
+          displayExpr: "member",
+          valueExpr: "member"
+        },
+        validationRules:[{type:"required"}]
+      }, 
+      {
+        dataField: "startDate",
+        editorType: "dxDateBox",
+        editorOptions: {
+            width: "100%",
+            type: "datetime",
+            onValueChanged: function(args) {
+                startDate = args.value;
+                form.getEditor("endDate") .option("value", new Date (startDate.getTime() + 30));
             }
-          },
-          {
-            label: {
-                text: "Mail Ids"
-            },
-            editorType: "dxTextBox",
-            dataField: "mailid"
-          }
-    ]);
-}
+        },
+        validationRules:[{type:"required"}]
+      }, 
+      {
+        name: "endDate",
+        dataField: "endDate",
+        editorType: "dxDateBox",
+        editorOptions: {width: "100%",type: "datetime"},
+        validationRules:[{type:"required"}]
+      },
+      {
+        label: {text: "Mail Ids"},
+        editorType: "dxTagBox",//"dxDropDownBox",
+        dataField: "mailids",
+        editorOptions: {
+          items: that.groupmembers,
+          displayExpr: "member",
+          valueExpr: "member"
+          
+          // onValueChanged:function(args)
+          // {
+          //   console.log(args);
+          // }
+          //contentTemplate:"myTemplate"
+          
+        },
+        validationRules:[{type:"required"}]
+      }
+   ]);
+  }
 
-  onAppointmentAdded (e) {
-  //console.log(e.appointmentData);
-    let newTask = {endDate : e.appointmentData.endDate,
-      mailid :e.appointmentData.mailid, 
+  onAppointmentAdded (e) 
+  {
+    let newTask = 
+    {
+      endDate : e.appointmentData.endDate,
+      mailids :[], 
       person_responsible : e.appointmentData.person_responsible, 
       startDate: e.appointmentData.startDate,
       text : e.appointmentData.text,
       userid : this.loginToken.id,
       _id:''
     };
+    e.appointmentData.mailids.forEach(element => {
+      newTask.mailids.push({'member':element})
+    });
+    //console.log(newTask);
 
     this.dataService.insertTask('http://localhost:8083/api/tasks/', newTask)
     .subscribe(resp=>{  
@@ -161,7 +206,8 @@ export class AppComponent {
         this.getTasks() ;
     });
   }
-  onAppointmentDeleted (e) {
+  onAppointmentDeleted (e) 
+  {
     //console.log(e);
     this.dataService.deleteTask('http://localhost:8083/api/tasks/'+e.appointmentData._id)
       .subscribe(resp=>{  

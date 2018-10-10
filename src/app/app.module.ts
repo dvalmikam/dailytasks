@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {  MatButtonModule,MatToolbarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {DataService} from './data.service';
-import { DxSchedulerModule, DxTemplateModule } from 'devextreme-angular';
+import { DxSchedulerModule, DxTemplateModule,DxTreeViewModule,DxTagBoxModule } from 'devextreme-angular';
 
 import { AppComponent } from './app.component';
 
@@ -23,6 +23,8 @@ import { AppComponent } from './app.component';
     HttpClientModule,
     DxSchedulerModule, 
     DxTemplateModule,
+    DxTreeViewModule,
+    DxTagBoxModule,
     StorageServiceModule
   ],
   providers: [

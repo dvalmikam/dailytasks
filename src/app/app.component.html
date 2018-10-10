@@ -4,21 +4,19 @@
   <mat-toolbar-row>
     <span>Daily Tasks</span>
     <span class="example-fill-remaining-space"></span>
-  
-  <button *ngIf="!isLoggedIn" type="button" mat-raised-button color="accent"  (click)="login()">
-    Signin With Google
- </button>
- <button *ngIf="isLoggedIn" type="button" 
- mat-raised-button color="accent"  (click)="logout()">
-  Signout
-</button>
+    <button *ngIf="!isLoggedIn" type="button" mat-raised-button color="accent"  (click)="login()">
+     Signin With Google
+    </button>
+    <button *ngIf="isLoggedIn" type="button" mat-raised-button color="accent"  (click)="logout()">
+      Signout
+    </button>
   </mat-toolbar-row>
 </mat-toolbar>
 
 <div>&nbsp;</div>
 
 <div *ngIf="dailytasks">
-<dx-scheduler
+ <dx-scheduler
     [dataSource]="dailytasks"
     [views]='["day","week", "month"]'
     currentView="week"
@@ -34,8 +32,24 @@
       <div>
           <div>{{appt.person_responsible}} : {{appt.text}}</div>
       </div>
-  </div>
-</dx-scheduler>
+    </div>
+    <!-- <div *dxTemplate="let data of 'myTemplate'">
+      <dx-tree-view
+                        [dataSource]="groupmembers"
+                        dataStructure="plain"
+                        keyExpr="member"
+                        parentIdExpr="categoryId"
+                        selectionMode="multiple"
+                        showCheckBoxesMode="normal"
+                        [selectNodesRecursive]="false"
+                        displayExpr="name"
+                        [selectByClick]="true"
+                        (onContentReady)="syncTreeViewSelection($event)"
+                        (onItemSelectionChanged)="treeView_itemSelectionChanged($event)"
+                    >
+                    </dx-tree-view>
+  </div> -->
+ </dx-scheduler>
 </div>
 
 

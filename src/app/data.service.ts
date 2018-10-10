@@ -5,9 +5,8 @@ import { Observable } from 'rxjs/Observable';
 import { SESSION_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { SocialUser } from 'angular5-social-login';
 
-
-
 const STORAGE_KEY = '';
+
 
 export interface task {
   _id: string,
@@ -16,16 +15,25 @@ export interface task {
   startDate: Date,
   endDate:Date,
   person_responsible: string,
-  mailid: string
+  mailids: groupmember[]
+}
+
+export interface groupmember {
+  member: string
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class DataService {
-
+export class DataService 
+{
   constructor(@Inject(SESSION_STORAGE) private storage: StorageService,
   private http: HttpClient) { }
+
+  getMembers(url:string) :Observable<groupmember[]>
+  {
+    return this.http.get<groupmember[]>(url);
+  }
 
   getTasks(url:string) :Observable<task[]>
   {
