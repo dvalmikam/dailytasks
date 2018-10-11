@@ -1,9 +1,10 @@
 import { Component} from '@angular/core';
-import {  MatButtonModule,MatToolbarModule} from '@angular/material';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {  MatButtonModule,MatToolbarModule,MatTabsModule} from '@angular/material';
 import { AuthService, GoogleLoginProvider, SocialUser } from "angular5-social-login";
 import { HttpClient } from '@angular/common/http';
 import { DataService, task, groupmember} from './data.service';
-import { DxSchedulerModule, DxTemplateModule,DxTagBoxModule } from 'devextreme-angular';
+import { DxSchedulerModule, DxTemplateModule,DxTagBoxModule,DxDataGridModule } from 'devextreme-angular';
 import Query from 'devextreme/data/query';
 
 @Component({
@@ -69,11 +70,11 @@ export class AppComponent
     this.dataService.getMembers('http://localhost:8083/api/members/?userid='+this.loginToken.id)
     .subscribe(resp=>{  
       this.groupmembers = resp;
-      this.groupmembers.push({'member':this.loginToken.email});
+      //this.groupmembers.push({'member':this.loginToken.email});
     },err=>{
       console.log(err.message);
       this.groupmembers=[];
-      this.groupmembers.push({'member':this.loginToken.email});
+      //this.groupmembers.push({'member':this.loginToken.email});
     });
   }
 
@@ -124,13 +125,13 @@ export class AppComponent
       {
         label: {text: "Responsible Person"},
         name: "person_responsible",
-        editorType: "dxSelectBox",
+        editorType: "dxTextBox",//"dxSelectBox",
         dataField: "person_responsible",
-        editorOptions: {
-          items: that.groupmembers,
-          displayExpr: "member",
-          valueExpr: "member"
-        },
+        // editorOptions: {
+        //   items: that.groupmembers,
+        //   displayExpr: "member",
+        //   valueExpr: "member"
+        // },
         validationRules:[{type:"required"}]
       }, 
       {
@@ -161,13 +162,11 @@ export class AppComponent
           items: that.groupmembers,
           displayExpr: "member",
           valueExpr: "member"
-          
           // onValueChanged:function(args)
           // {
           //   console.log(args);
           // }
           //contentTemplate:"myTemplate"
-          
         },
         validationRules:[{type:"required"}]
       }
@@ -214,6 +213,16 @@ export class AppComponent
         alert(resp);
         this.getTasks() ;
     });
+  }
+
+  grid_RowInserted(e)
+  {
+    console.log(this.groupmembers);
+  }
+
+  grid_RowRemoved(e)
+  {
+
   }
 }
 

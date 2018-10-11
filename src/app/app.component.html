@@ -14,42 +14,56 @@
 </mat-toolbar>
 
 <div>&nbsp;</div>
+<mat-tab-group backgroundColor="accent">
+  <mat-tab label="Daily Tasks"> 
+      <div *ngIf="dailytasks">
+          <dx-scheduler
+             [dataSource]="dailytasks"
+             [views]='["day","week", "month"]'
+             currentView="week"
+             [currentDate]="currentDate"
+             [startDayHour]="6"
+             [height]="600"
+             (onAppointmentAdded)="onAppointmentAdded($event)"
+             (onAppointmentUpdated)="onAppointmentUpdated($event)"
+             (onAppointmentDeleted)="onAppointmentDeleted($event)"
+             appointmentTemplate="appointment-template"
+             (onAppointmentFormCreated)="onAppointmentFormCreated($event)">
+             <div *dxTemplate="let appt of 'appointment-template'">
+               <div>
+                   <div>{{appt.person_responsible}} : {{appt.text}}</div>
+               </div>
+             </div>
+          </dx-scheduler>
+       </div>
+  </mat-tab>
+  <mat-tab label="Group Members"> 
+      <dx-data-grid 
+      id="gridContainer"
+      [dataSource]="groupmembers"
+      keyExpr="member"
+      [allowColumnReordering]="true"
+      [showBorders]="true"
+      (onRowInserted)="grid_RowInserted($event)"
+      (onRowRemoved)="grid_RowRemoved($event)">
+      
+      <dxo-paging [enabled]="true"></dxo-paging>
+      <dxo-editing 
+           mode="row"
+           [allowUpdating]="false"
+           [allowDeleting]="true"
+           [allowAdding]="true">
+      </dxo-editing>
+      
+      <dxi-column dataField="member" caption="Member">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+          <dxi-validation-rule type="email"></dxi-validation-rule>
+      </dxi-column>
+  </dx-data-grid>
+  </mat-tab>
+</mat-tab-group>
 
-<div *ngIf="dailytasks">
- <dx-scheduler
-    [dataSource]="dailytasks"
-    [views]='["day","week", "month"]'
-    currentView="week"
-    [currentDate]="currentDate"
-    [startDayHour]="6"
-    [height]="600"
-    (onAppointmentAdded)="onAppointmentAdded($event)"
-    (onAppointmentUpdated)="onAppointmentUpdated($event)"
-    (onAppointmentDeleted)="onAppointmentDeleted($event)"
-    appointmentTemplate="appointment-template"
-    (onAppointmentFormCreated)="onAppointmentFormCreated($event)">
-    <div *dxTemplate="let appt of 'appointment-template'">
-      <div>
-          <div>{{appt.person_responsible}} : {{appt.text}}</div>
-      </div>
-    </div>
-    <!-- <div *dxTemplate="let data of 'myTemplate'">
-      <dx-tree-view
-                        [dataSource]="groupmembers"
-                        dataStructure="plain"
-                        keyExpr="member"
-                        parentIdExpr="categoryId"
-                        selectionMode="multiple"
-                        showCheckBoxesMode="normal"
-                        [selectNodesRecursive]="false"
-                        displayExpr="name"
-                        [selectByClick]="true"
-                        (onContentReady)="syncTreeViewSelection($event)"
-                        (onItemSelectionChanged)="treeView_itemSelectionChanged($event)"
-                    >
-                    </dx-tree-view>
-  </div> -->
- </dx-scheduler>
-</div>
+
+
 
 

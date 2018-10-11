@@ -4,10 +4,10 @@ import { StorageServiceModule } from 'ngx-webstorage-service';
 import { SocialLoginModule, AuthServiceConfig, GoogleLoginProvider } from "angular5-social-login";
 import { getAuthServiceConfigs } from "./socialloginConfig";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {  MatButtonModule,MatToolbarModule} from '@angular/material';
-import {HttpClientModule} from '@angular/common/http';
-import {DataService} from './data.service';
-import { DxSchedulerModule, DxTemplateModule,DxTreeViewModule,DxTagBoxModule } from 'devextreme-angular';
+import { MatButtonModule,MatToolbarModule, MatTabsModule} from '@angular/material';
+import { HttpClientModule} from '@angular/common/http';
+import { DataService} from './data.service';
+import { DxSchedulerModule, DxTemplateModule,DxDataGridModule,DxTagBoxModule } from 'devextreme-angular';
 
 import { AppComponent } from './app.component';
 
@@ -17,14 +17,16 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     SocialLoginModule,
     MatButtonModule,
     MatToolbarModule,
     HttpClientModule,
     DxSchedulerModule, 
     DxTemplateModule,
-    DxTreeViewModule,
+    DxDataGridModule,
     DxTagBoxModule,
+    MatTabsModule,
     StorageServiceModule
   ],
   providers: [
