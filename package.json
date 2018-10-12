@@ -1,7 +1,6 @@
 {
   "name": "task-app",
   "version": "0.0.0",
-  "main":"app.js",
   "scripts": {
     "ng": "ng",
     "start": "node server.js", 
