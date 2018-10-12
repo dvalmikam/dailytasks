@@ -71,8 +71,8 @@ export class AppComponent
     this.dataService.getMembers('http://localhost:8083/api/members/?userid='+this.loginToken.id)
     .subscribe(resp=>{  
       //console.log(resp);
-      this.groupmembers = resp.group_members;
-      this.currentUser = resp;
+      this.groupmembers = resp[0].group_members;
+      this.currentUser = resp[0];
     },err=>{
       console.log(err.message);
       this.groupmembers=[];
