@@ -116,7 +116,7 @@ module.exports = function(app, config)
             } 
         }); 
     });
-
+    
     // app.delete('/api/members/:id/:memberid', (req, res) => {
     //     const objId = { '_id': new mongoose.Types.ObjectId(req.params.id) };
     //     const memberObjId = { '_id': new mongoose.Types.ObjectId(req.params.memberid) };
