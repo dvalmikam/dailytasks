@@ -22,6 +22,12 @@ export interface groupmember {
   member: string
 }
 
+export interface user {
+  _id:string,
+  userid:String,
+  group_members:groupmember[]
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,9 +36,17 @@ export class DataService
   constructor(@Inject(SESSION_STORAGE) private storage: StorageService,
   private http: HttpClient) { }
 
-  getMembers(url:string) :Observable<groupmember[]>
+  getMembers(url:string) :Observable<user[]>
   {
-    return this.http.get<groupmember[]>(url);
+    return this.http.get<user[]>(url);
+  }
+  insertMember(url:string,userMembers:user)
+  {
+    return this.http.put(url,userMembers)
+  }
+  deleteMember(url:string)
+  {
+    return this.http.delete(url);
   }
 
   getTasks(url:string) :Observable<task[]>

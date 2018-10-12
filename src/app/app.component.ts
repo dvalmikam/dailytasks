@@ -3,7 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {  MatButtonModule,MatToolbarModule,MatTabsModule} from '@angular/material';
 import { AuthService, GoogleLoginProvider, SocialUser } from "angular5-social-login";
 import { HttpClient } from '@angular/common/http';
-import { DataService, task, groupmember} from './data.service';
+import { DataService, task, groupmember, user} from './data.service';
 import { DxSchedulerModule, DxTemplateModule,DxTagBoxModule,DxDataGridModule } from 'devextreme-angular';
 import Query from 'devextreme/data/query';
 
@@ -21,6 +21,7 @@ export class AppComponent
   currentDate: Date = new Date();
   public dailytasks: task[];
   public groupmembers:groupmember[];
+  public currentUser:user;
 
   constructor(private socialAuthService: AuthService, 
     private http:HttpClient, private dataService:DataService ) {
@@ -69,12 +70,12 @@ export class AppComponent
   {
     this.dataService.getMembers('http://localhost:8083/api/members/?userid='+this.loginToken.id)
     .subscribe(resp=>{  
-      this.groupmembers = resp;
-      //this.groupmembers.push({'member':this.loginToken.email});
+      //console.log(resp);
+      this.groupmembers = resp.group_members;
+      this.currentUser = resp;
     },err=>{
       console.log(err.message);
       this.groupmembers=[];
-      //this.groupmembers.push({'member':this.loginToken.email});
     });
   }
 
@@ -188,7 +189,6 @@ export class AppComponent
     e.appointmentData.mailids.forEach(element => {
       newTask.mailids.push({'member':element})
     });
-    //console.log(newTask);
 
     this.dataService.insertTask('http://localhost:8083/api/tasks/', newTask)
     .subscribe(resp=>{  
@@ -217,12 +217,29 @@ export class AppComponent
 
   grid_RowInserted(e)
   {
-    console.log(this.groupmembers);
+    //console.log(this.currentUser);
+    this.currentUser.group_members = this.groupmembers;
+    this.dataService.insertMember('http://localhost:8083/api/members/'+this.currentUser._id, this.currentUser)
+    .subscribe(resp=>{  
+      alert(resp);
+      this.getMembers() ;
+    });
   }
 
   grid_RowRemoved(e)
   {
-
+    //console.log('http://localhost:8083/api/members/'+this.currentUser._id+'/'+e.data._id);
+    // this.dataService.deleteMember('http://localhost:8083/api/members/'+this.currentUser._id+'/'+e.data._id)
+    // .subscribe(resp=>{  
+    //   alert(resp);
+    //   this.getMembers() ;
+    // });
+    this.currentUser.group_members = this.groupmembers;
+    this.dataService.insertMember('http://localhost:8083/api/members/'+this.currentUser._id, this.currentUser)
+    .subscribe(resp=>{  
+      alert(resp);
+      this.getMembers() ;
+    });
   }
 }
 

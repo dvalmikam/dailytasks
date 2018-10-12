@@ -54,22 +54,9 @@ module.exports = function(app, config)
 
     var userSchema = new mongoose.Schema({
         userid:String,
-        group_members:String
-    });
-    app.get('/api/members', (req, res) => {
-        let userid = req.query.userid; 
-        
-        monDb.collection('usersCollection')
-        .findOne({'userid':userid})
-        //.toArray()
-        .then((member) => {
-            //console.log(members[0].group_members);
-            response.data = member.group_members;
-            res.json(member.group_members);
-        })
-        .catch((err) => {
-            sendError(err, res);
-        });
+        group_members:[{
+            member: String
+        }]
     });
 
     var taskSchema = new mongoose.Schema({
@@ -85,11 +72,69 @@ module.exports = function(app, config)
     });
 
     var task = mongoose.model('Task', taskSchema);
+    var user = mongoose.model('User', userSchema);
+
+    app.get('/api/members', (req, res) => {
+        let userid = req.query.userid; 
+        
+        monDb.collection('usersCollection')
+        .findOne({'userid':userid})
+        .then((member) => {
+            var user1 = new user(); 
+            if(member!=null)
+                user1 = member;
+            else
+            {
+                var newUser = new user();
+                newUser.userid = userid;
+                monDb.collection("usersCollection")
+                .insertOne(newUser, function(error, response1) {
+                    if (error) 
+                        console.log(error);
+                    if(res)
+                        user1 = response1;
+                });
+            }   
+            response.data = user1;
+            res.json(user1);
+        })
+        .catch((err) => {
+            console.log(err);
+            sendError(err, res);
+        });
+    });
+
+    app.put('/api/members/:id', (req, res) => {
+        var updatedUser = new user(req.body);
+        console.log(req.params.id);
+        const objId = { '_id': new mongoose.Types.ObjectId(req.params.id) };
+        monDb.collection('usersCollection').updateOne(objId, updatedUser, (err, result) => {
+            if (err) {
+                res.send({'error':'An error has occurred'});
+            } else {
+                res.json("Member added successfully");
+            } 
+        }); 
+    });
+
+    // app.delete('/api/members/:id/:memberid', (req, res) => {
+    //     const objId = { '_id': new mongoose.Types.ObjectId(req.params.id) };
+    //     const memberObjId = { '_id': new mongoose.Types.ObjectId(req.params.memberid) };
+    //     console.log(objId);
+    //     console.log(memberObjId);
+    //     monDb.collection('usersCollection').updateOne(objId,{ $pull: { "group_members": { "_id": memberObjId } } },
+    //      (err, result) => {
+    //         if (err) {
+    //             res.send({'error':'An error has occurred'});
+    //         } else {
+    //             res.json("Member deleted successfully");
+    //         } 
+    //     });
+    // });
 
     app.get('/api/tasks', (req, res) => {
         let userid = req.query.userid;
         let useremail = req.query.email;
-        //console.log(useremail);
         //connection((db) => {
         monDb.collection('tasksCollection')
             // .find({ $where: function() 
@@ -100,7 +145,6 @@ module.exports = function(app, config)
             .find({ $or: [ { 'userid': userid }, { 'mailids.member' : useremail } ] })//{'userid':userid})
             .toArray()
             .then((tasks) => {
-                //console.log(tasks);
                 response.data = tasks;
                 res.json(tasks);
             })
@@ -112,8 +156,6 @@ module.exports = function(app, config)
 
     app.post('/api/tasks', (req, res) => {
         var newTask = new task(req.body);
-        //console.log(newTask);
-        
         monDb.collection("tasksCollection")
         .insertOne(newTask, function(error, response) {
             if (error) 
@@ -149,7 +191,6 @@ module.exports = function(app, config)
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
-                //res.send(updatedTask);
                 res.json("Task updated successfully");
             } 
         });
@@ -161,7 +202,6 @@ module.exports = function(app, config)
             if (err) {
                 res.send({'error':'An error has occurred'});
             } else {
-                //res.send(updatedTask);
                 res.json("Task deleted successfully");
             } 
         });
