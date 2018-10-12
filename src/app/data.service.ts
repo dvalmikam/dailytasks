@@ -36,9 +36,9 @@ export class DataService
   constructor(@Inject(SESSION_STORAGE) private storage: StorageService,
   private http: HttpClient) { }
 
-  getMembers(url:string) :Observable<user[]>
+  getMembers(url:string) :Observable<user>
   {
-    return this.http.get<user[]>(url);
+    return this.http.get<user>(url);
   }
   insertMember(url:string,userMembers:user)
   {
