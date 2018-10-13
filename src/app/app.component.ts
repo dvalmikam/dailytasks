@@ -22,6 +22,7 @@ export class AppComponent
   public dailytasks: task[];
   public groupmembers:groupmember[];
   public currentUser:user;
+  private apiUrl = "/api/";
 
   constructor(private socialAuthService: AuthService, 
     private http:HttpClient, private dataService:DataService ) {
@@ -68,7 +69,7 @@ export class AppComponent
 
   getMembers()
   {
-    this.dataService.getMembers('http://localhost:8083/api/members/?userid='+this.loginToken.id)
+    this.dataService.getMembers(this.apiUrl+'members/?userid='+this.loginToken.id)
     .subscribe(resp=>{  
       //console.log(resp);
       this.groupmembers = resp.group_members;
@@ -81,7 +82,7 @@ export class AppComponent
 
   getTasks() 
   {
-    this.dataService.getTasks('http://localhost:8083/api/tasks/?userid='+this.loginToken.id+'&email='+this.loginToken.email)
+    this.dataService.getTasks(this.apiUrl+'tasks/?userid='+this.loginToken.id+'&email='+this.loginToken.email)
     .subscribe(resp=>{  
       //console.log(resp);
       this.dailytasks = resp;
@@ -190,7 +191,7 @@ export class AppComponent
       newTask.mailids.push({'member':element})
     });
 
-    this.dataService.insertTask('http://localhost:8083/api/tasks/', newTask)
+    this.dataService.insertTask(this.apiUrl+'tasks/', newTask)
     .subscribe(resp=>{  
       alert(resp);
       this.getTasks() ;
@@ -199,7 +200,7 @@ export class AppComponent
   onAppointmentUpdated (e) {
     //console.log(e);
     let updatedTask = e.appointmentData;
-    this.dataService.updateTask('http://localhost:8083/api/tasks/'+e.appointmentData._id, updatedTask)
+    this.dataService.updateTask(this.apiUrl+'tasks/'+e.appointmentData._id, updatedTask)
       .subscribe(resp=>{  
         alert(resp);
         this.getTasks() ;
@@ -208,7 +209,7 @@ export class AppComponent
   onAppointmentDeleted (e) 
   {
     //console.log(e);
-    this.dataService.deleteTask('http://localhost:8083/api/tasks/'+e.appointmentData._id)
+    this.dataService.deleteTask(this.apiUrl+'tasks/'+e.appointmentData._id)
       .subscribe(resp=>{  
         alert(resp);
         this.getTasks() ;
@@ -219,7 +220,7 @@ export class AppComponent
   {
     //console.log(this.currentUser);
     this.currentUser.group_members = this.groupmembers;
-    this.dataService.insertMember('http://localhost:8083/api/members/'+this.currentUser._id, this.currentUser)
+    this.dataService.insertMember(this.apiUrl+'members/'+this.currentUser._id, this.currentUser)
     .subscribe(resp=>{  
       alert(resp);
       this.getMembers() ;
@@ -235,7 +236,7 @@ export class AppComponent
     //   this.getMembers() ;
     // });
     this.currentUser.group_members = this.groupmembers;
-    this.dataService.insertMember('http://localhost:8083/api/members/'+this.currentUser._id, this.currentUser)
+    this.dataService.insertMember(this.apiUrl+'members/'+this.currentUser._id, this.currentUser)
     .subscribe(resp=>{  
       alert(resp);
       this.getMembers() ;
